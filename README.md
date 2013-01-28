@@ -10,8 +10,9 @@ requests.
 Nopassword can easily be added to existing webapps, no matter what
 programming language they were written in.  All that's needed is an HTML
 form for users to submit their email address and a web server directive to
-dispatch auth requests to Nopassword.  Your webapp can then authenticate
-users by calling a simple command-line utility.
+dispatch authentication requests to Nopassword.  Your webapp can then
+authenticate users by issuing an HTTP request to the Nopassword server.
+
 
 Installation
 ============
@@ -110,20 +111,20 @@ Auth procedure elaborated
 URL Routes
 ----------
 
-- **GET /** -> 404
+- `GET /` -> 404
 
-- **POST /** expects a value for the key 'email' in the request body. If
+- `POST /` expects a value for the key 'email' in the request body. If
   sending the login email succeeds, returns a 303 redirect to the
   `email_succeeded` URL specified in the config_file.  If sending the email
   fails, returns a 303 redirect to the `email_failed` URL.  Otherwise,
   returns a 400 Bad Request.
 
-- **GET /<login_token>** is requested when the user clicks the login link in
+- `GET /<login_token>` is requested when the user clicks the login link in
   the email.  It sets the Nopassword cookie and 303 redirects to the
   `login_succeeded` URL defined in the config_file. Otherwise, redirects to
   the `login_failed` URL.
 
-- **GET /<auth_token>** is usually requested by the webapp itself. If the
+- `GET /<auth_token>` is usually requested by the webapp itself. If the
   auth token is valid, the 200 response contains a JSON object with the
   fields `user_id` and `user_email`.  Else the response is 401.  Note that
   this URL, like all the others, is public and an attacker can request the
@@ -131,7 +132,7 @@ URL Routes
   secure (SSL) cookies by default, to prevent eavesdroppers from stealing
   cookies.
 
-- **PUT /<auth_token>** is used to change a users email address. The request
+- `PUT /<auth_token>` is used to change a users email address. The request
   body should contain the new email address.  Note that anyone who knows a valid
   auth token can issue this request to change the email address.
 
