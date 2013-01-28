@@ -20,7 +20,7 @@ Installation
 
 2. Create a form with an `<input type="text" name="email">` and a submit
    button.  Make this form POST to a URL under your control (e.g.,
-   \https://example.com/login)
+   https://example.com/login)
  
 3. Start the Nopassword server by running `nopassword <path-to-config_file>`
 
@@ -28,17 +28,17 @@ Installation
    server.  For instance, if you've used https://example.com/login in step
    2, the following nginx config should do the trick:
 
-       ```perl
+       ```
        location /login {
-         proxy_pass        http://localhost:1500;
-         proxy_set_header  X-Real-IP  $remote_addr;
+         rewrite /login/(.*) /$1 break;
+         proxy_pass http://localhost:1500;
+         proxy_redirect off;
+         proxy_set_header X-Real-IP  $remote_addr;
        }
        ```
 
    Note that the default port number is 1500, but you can change that in the
-   config_file.  Also note that the X-Real-IP http header should contain the
-   client's IP address.  See the [nginx
-   documentation](http://wiki.nginx.org/HttpProxyModule) for more details.
+   config_file. 
 
 5. Create some authentication function/middleware in your webapp that
    authenticates requests by contacting the Nopassword server and giving it
@@ -71,7 +71,6 @@ Installation
    actually works!
 
 
-
 Architecture
 ============
 
@@ -102,10 +101,41 @@ Auth procedure elaborated
 - system looks up the user belonging to the token
 - system checks if the current time isn't later than the expiry time
 - system generates an auth token and stores it linked to the user
-- system sets auth token as a secure, infinitely persistent cookie to the user
+- system sets auth token as a secure, persistent cookie
 - user sends back the cookie on every subsequent request
 - system authenticates the user on every subsequent request
 - everybody's happy
+
+
+URL Routes
+----------
+
+- **GET /** -> 404
+
+- **POST /** expects a value for the key 'email' in the request body. If
+  sending the login email succeeds, returns a 303 redirect to the
+  `email_succeeded` URL specified in the config_file.  If sending the email
+  fails, returns a 303 redirect to the `email_failed` URL.  Otherwise,
+  returns a 400 Bad Request.
+
+- **GET /<login_token>** is requested when the user clicks the login link in
+  the email.  It sets the Nopassword cookie and 303 redirects to the
+  `login_succeeded` URL defined in the config_file. Otherwise, redirects to
+  the `login_failed` URL.
+
+- **GET /<auth_token>** is usually requested by the webapp itself. If the
+  auth token is valid, the 200 response contains a JSON object with the
+  fields `user_id` and `user_email`.  Else the response is 401.  Note that
+  this URL, like all the others, is public and an attacker can request the
+  email address of a compromised auth cookie.  That's why Nopassword sets
+  secure (SSL) cookies by default, to prevent eavesdroppers from stealing
+  cookies.
+
+- **PUT /<auth_token>** is used to change a users email address. The request
+  body should contain the new email address.  Note that anyone who knows a valid
+  auth token can issue this request to change the email address.
+
+TODO: Find a way to distinguish between login tokens and auth tokens.
 
 
 Relations

@@ -4,6 +4,9 @@
 
 server_name="example.com" # not used outside this file
 
+# The interface and port to contact the Nopassword server
+listen="127.0.0.1:1500"
+
 # How many minutes an email login link is valid
 email_expiry_time=60
 
