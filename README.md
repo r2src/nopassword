@@ -28,12 +28,12 @@ Installation
    server.  For instance, if you've used https://example.com/login in step
    2, the following nginx config should do the trick:
 
-       '''perl
+       ```perl
        location /login {
          proxy_pass        http://localhost:1500;
          proxy_set_header  X-Real-IP  $remote_addr;
        }
-       '''
+       ```
 
    Note that the default port number is 1500, but you can change that in the
    config_file.  Also note that the X-Real-IP http header should contain the
