@@ -20,9 +20,9 @@ Installation
 
 2. Create a form with an `<input type="text" name="email">` and a submit
    button.  Make this form POST to a URL under your control (e.g.,
-   https://example.com/login)
-
-3. Start the Nopassword server by running `nopassword --server <path-to-config_file>`
+   \https://example.com/login)
+ 
+3. Start the Nopassword server by running `nopassword <path-to-config_file>`
 
 4. Setup your webserver to reverse proxy login requests to the Nopassword
    server.  For instance, if you've used https://example.com/login in step
@@ -49,7 +49,7 @@ Installation
        auth_token = request.cookies.get('Nopassword')
        if auth_token:
            response = requests.get('http://localhost:1500/' + auth_token)
-	   if response.status_code == 200:
+           if response.status_code == 200:
                user_id = response.json['user_id']
                user_email = response.json['user_email']
                '''
