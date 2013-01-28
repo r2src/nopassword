@@ -8,43 +8,68 @@ cookie is set with an auth token that authenticates the user on subsequent
 requests.
 
 Nopassword can easily be added to existing webapps, no matter what
-programming language they were written in. All that's needed is an HTML form
-for users to submit their email address and a web server directive to dispatch
-auth requests to Nopassword. You can then authenticate users by calling a
-simple command-line utility.
+programming language they were written in.  All that's needed is an HTML
+form for users to submit their email address and a web server directive to
+dispatch auth requests to Nopassword.  Your webapp can then authenticate
+users by calling a simple command-line utility.
 
+Installation
+============
 
-How to use nopassword with your webapp
-======================================
+1. Edit the config_file and save it in a convenient location.
 
-* Copy config_file to /etc/nopassword/yoursite.com and edit it
-  appropriately.
+2. Create a form with an `<input type="text" name="email">` and a submit
+   button.  Make this form POST to a URL under your control (e.g.,
+   https://example.com/login)
 
-* Create a form with an `<input type="text" name="email">` and a submit button.
-  Make this form POST to yoursite.com/login
+3. Start the Nopassword server by running `nopassword --server <path-to-config_file>`
 
-* Setup your webserver to redirect everything below /login to nopassword.wsgi
+4. Setup your webserver to reverse proxy login requests to the Nopassword
+   server.  For instance, if you've used https://example.com/login in step
+   2, the following nginx config should do the trick:
 
-* Create some authentication function/middleware in your webapp:
-  - To authenticate requests, run the following command:
-    `nopassword <yoursite.com> <auth_token>`
-  - Check the exit status to determine if an auth token is valid.
-  - If the auth token is valid, you can extract the user's id and email address
-    from the standard output.
+       '''perl
+       location /login {
+         proxy_pass        http://localhost:1500;
+         proxy_set_header  X-Real-IP  $remote_addr;
+       }
+       '''
 
-* You can set a user's email address with the following command:
-  `nopassword <yoursite.com> <user_id> <email_address>`
+   Note that the default port number is 1500, but you can change that in the
+   config_file.  Also note that the X-Real-IP http header should contain the
+   client's IP address.  See the [nginx
+   documentation](http://wiki.nginx.org/HttpProxyModule) for more details.
 
+5. Create some authentication function/middleware in your webapp that
+   authenticates requests by contacting the Nopassword server and giving it
+   the auth token the user supplied.  The auth token is the value of the
+   cookie with the name `Nopassword`. In pseudocode:
 
-Scaling up
-==========
+       ```python
+       auth_token = request.cookies.get('Nopassword')
+       if auth_token:
+           response = requests.get('http://localhost:1500/' + auth_token)
+	   if response.status_code == 200:
+               user_id = response.json['user_id']
+               user_email = response.json['user_email']
+               '''
+               At this point, the user is logged in and you have his/her id
+               and email-address. You can use the id as the primary key in
+               your user database. Next, you should probably check if the id
+               is already present in your database or else create a new user
+               and show a nice welcome message.
+               '''
+           else:
+               raise AuthenticationFailed
+       else
+           show_login_page()
+	   
+       ```
 
-The command-line utility is a potential bottleneck because it has to run in
-a subprocess for each authentication request.  Therefore, the command line
-program simply connects to the running wsgi app and calls the appropriate
-function.  This way, when the load gets high, webapp programmers can
-incorporate the connection code into their own program and prevent forking a
-subprocess for each authentication request.
+   If you use Python with
+   [Requests](http://docs.python-requests.org/en/latest/), this pseudocode
+   actually works!
+
 
 
 Architecture

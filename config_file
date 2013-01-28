@@ -1,21 +1,8 @@
 #!/bin/sh
-
-############################
-# Nopassword configuration
 #
-# This is a per-host configuration file of Nopassword. It should have the
-# same name as the primary hostname of the website and be placed in
-# /etc/nopassword/ (e.g., /etc/nopassword/example.com)
-#
-# Make sure the filename and the server_name are the same as the
-# $server_name variable that is passed by the webserver to nopassword.wsgi
+# This is the default configuration file for Nopassword
 
-server_name="example.com"
-
-
-
-###################
-# Security
+server_name="example.com" # not used outside this file
 
 # How many minutes an email login link is valid
 email_expiry_time=60
@@ -28,36 +15,17 @@ email_timeframe= 720 # minutes
 ip_tries=10
 ip_timeframe=1440 # minutes
 
-# If browser fingerprinting is enabled, the login link must be opened
-# in the same browser that was used to request the login link.
-browser_fingerprinting=true
+# The page to redirect to after the email was sent successfully.
+email_succeeded="http://$server_name/nopassword/sent.html"
 
-
-
-###################
-# URLs
-
-# The page to redirect to after the user has clicked "Login" and the
-# email was sent successfully.
-email_succeeded="http://$server_name/np/sent.html"
-
-# The page to redirect when there was an error sending the email.  (This is
-# most likely caused by the user failing one of the security tests)
-email_failed="http://$server_name/np/not_sent.html"
+# The page to redirect when there was an error sending the email.
+email_failed="http://$server_name/nopassword/not_sent.html"
 
 # The page to redirect to after the user's login link has been validated. 
-# (This page will receive the cookie containing the auth token.)
-login_succeeded="http://$server_name/np/login_succeeded.html"
+login_succeeded="http://$server_name/"
 
 # The page to redirect to if the user's login link could not be verified. 
-# (This is most likely caused by an already-used or expired link, or bad
-# copy-pasting by the user.)
-login_failed="http://$server_name/np/login_failed.html"
-
-
-
-###################
-# Email
+login_failed="http://$server_name/nopassword/login_failed.html"
 
 email_sendmail="/usr/sbin/sendmail -t -i"
 email_reply_to="support@$server_name"
@@ -65,10 +33,11 @@ email_subject="Login link for $server_name"
 email_body="Dear user,
 
 Please click the following link to log into $server_name:
-http://example.com/login/{{login_token}}
+http://$server_name/login/{{login_token}}
 
-(If you didn't request a login link, please ignore this email.)
+To prevent anyone else from using this link, it can only be used once and
+will expire after $email_expiry_time minutes.
 
-See you soon,
+Greetings,
 The $server_name team.
 "
