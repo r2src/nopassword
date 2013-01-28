@@ -13,6 +13,10 @@ form for users to submit their email address and a web server directive to
 dispatch authentication requests to Nopassword.  Your webapp can then
 authenticate users by issuing an HTTP request to the Nopassword server.
 
+Nopassword was inspired by this
+[blog post by Ben Brown](http://notes.xoxco.com/post/27999787765/is-it-time-for-password-less-login)
+and the desire of creating a language-agnostic version of the
+[NoPassword plugin for Ruby on Rails by Alex Smolen](https://github.com/alsmola/nopassword).
 
 Installation
 ============
