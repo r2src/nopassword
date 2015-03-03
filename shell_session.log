@@ -1,0 +1,21 @@
+$ npwd -d nopassword.db
+Welcome to Nopassword!
+using database /home/jj/nopassword.db
+server listening on localhost:7750
+^Z$ bg
+$ npwclient jj@r2src.com --template email.txt
+email sent successfully
+$ !!
+error: cannot send more than 1 email per 24 hours
+You have new mail
+$ mail
+Dear new user,
+
+Please visit the following URL to login to your account:
+http://example.com/login/yLd78flk838h4j
+
+$ npwclient yLd78flk838h4j
+jj@r2src.com
+$ !!
+error: token not found
+$ 
