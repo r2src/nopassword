@@ -1,0 +1,35 @@
+Protocol
+--------
+
+The npw protocol is very simple and resembles standard shell command
+invocation. After connecting via TCP to the server (which listens on
+port 7750 by default), te client sends a single line of text
+representing a command followed by zero or more arguments separated by
+spaces. The final newline character ('\n') prompts the server to
+generate a single-line response, after which the server closes the
+connection.
+
+The npw server should accept the following requests:
+
+- `send-email email-address [identifier]`
+
+  Sends an email containing the login token, using the template that
+  was specified when the server was started. On success, the server
+  responds with `email sent`. On error, the server responds with
+  `error: ` followed by a description of why the email could not be
+  sent.
+
+  By default, the npw server will not sent more than 3 emails per 24
+  hours to the same email address. Furthermore, the optional argument
+  `identifier` can be used to limit login requests per client. By
+  default, the npw server will not sent more then 3 emails per 24
+  hours for the same identifier. It is suggested that you use your
+  client's IP address as the identifier.
+
+- `validate-token token`
+
+  Looks up the token in the database of sent emails. If found, the
+  server returns the associated email address and deletes it from the
+  database.  This means you can exchange a valid token for an email
+  address only once!  On error, the server responds with the string
+  `error: ` followed by the error description.
